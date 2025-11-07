@@ -1,12 +1,11 @@
 #ifndef PILA_H
 #define PILA_H
-#pragma once
 /*
   Pila.h — TAD Pila (LIFO) genérica para snapshots/undo en el Monopoly.
   Implementa el tipo abstracto Pila utilizando std::stack internamente,
   cumpliendo con las operaciones requeridas: apilar, desapilar, vacia y limpiar.
 
-  Aunque se apoya en STL, mantiene una interfaz de TAD propio.
+  Aunque se apoya en STL, mantiene una interfaz de TAD propio  .
 */
 
 #include <stack>
