@@ -1,75 +1,90 @@
 #ifndef PILA_H
 #define PILA_H
-/*
-  Pila.h — TAD Pila (LIFO) genérica para snapshots/undo en el Monopoly.
-  Implementa el tipo abstracto Pila utilizando std::stack internamente,
-  cumpliendo con las operaciones requeridas: apilar, desapilar, vacia y limpiar.
 
-  Aunque se apoya en STL, mantiene una interfaz de TAD propio  .
-*/
-
-#include <stack>
-#include <utility>
+#include <cstddef>
+#include <vector>
 
 namespace edd {
 
-    template <typename T>
-    class Pila {
-    private:
-        // Nodo lógico (representa cada elemento apilado, útil para documentación del TAD)
-        struct Nodo {
-            T dato;
-            Nodo(const T& d) : dato(d) {}
-            Nodo(T&& d) : dato(std::move(d)) {}
-        };
+template <typename T>
+struct Pila {
+public:
+    Pila() : cima_(nullptr), tam_(0) {}
 
-        std::stack<Nodo> pila_;  // pila interna STL
+    Pila(const Pila& other) : cima_(nullptr), tam_(0) {
+        copiarDesde(other);
+    }
 
-    public:
-        // Constructor y destructor por defecto
-        Pila() = default;
-        ~Pila() = default;
-
-        // Constructor de copia y movimiento
-        Pila(const Pila& other) = default;
-        Pila(Pila&& other) noexcept = default;
-        Pila& operator=(const Pila& other) = default;
-        Pila& operator=(Pila&& other) noexcept = default;
-
-        // @pre  ---
-        // @post Inserta un elemento en el tope de la pila.
-        void apilar(const T& valor) {
-            pila_.emplace(valor);
+    Pila& operator=(const Pila& other) {
+        if (this != &other) {
+            limpiar();
+            copiarDesde(other);
         }
+        return *this;
+    }
 
-        // @pre  ---
-        // @post Inserta un elemento movido en el tope de la pila.
-        void apilar(T&& valor) {
-            pila_.emplace(std::move(valor));
-        }
+    ~Pila() {
+        limpiar();
+    }
 
-        // @pre  La pila puede estar vacía.
-        // @post Si hay elementos, desapila el tope y lo devuelve en 'out'; retorna true.
-        //       Si está vacía, retorna false.
-        bool desapilar(T& out) noexcept {
-            if (pila_.empty()) return false;
-            out = std::move(pila_.top().dato);
-            pila_.pop();
-            return true;
-        }
+    void apilar(const T& valor) {
+        Nodo* nuevo = new Nodo();
+        nuevo->valor = valor;
+        nuevo->siguiente = cima_;
+        cima_ = nuevo;
+        ++tam_;
+    }
 
-        // @pre  ---
-        // @post Libera todos los elementos de la pila.
-        void limpiar() noexcept {
-            while (!pila_.empty()) pila_.pop();
+    bool desapilar(T& out) {
+        if (!cima_) {
+            return false;
         }
+        Nodo* actual = cima_;
+        out = actual->valor;
+        cima_ = actual->siguiente;
+        delete actual;
+        --tam_;
+        return true;
+    }
 
-        // @pre  ---
-        // @post Retorna true si la pila está vacía.
-        bool vacia() const noexcept {
-            return pila_.empty();
+    bool vacia() const {
+        return cima_ == nullptr;
+    }
+
+    void limpiar() {
+        while (cima_) {
+            Nodo* actual = cima_;
+            cima_ = actual->siguiente;
+            delete actual;
         }
+        tam_ = 0;
+    }
+
+    std::size_t tam() const {
+        return tam_;
+    }
+
+private:
+    struct Nodo {
+        T valor;
+        Nodo* siguiente;
     };
+
+    void copiarDesde(const Pila& other) {
+        std::vector<const Nodo*> nodos;
+        const Nodo* cursor = other.cima_;
+        while (cursor) {
+            nodos.push_back(cursor);
+            cursor = cursor->siguiente;
+        }
+        for (std::size_t i = nodos.size(); i > 0; --i) {
+            apilar(nodos[i - 1]->valor);
+        }
+    }
+
+    Nodo* cima_;
+    std::size_t tam_;
+};
 
 }
 #endif //PILA_H
