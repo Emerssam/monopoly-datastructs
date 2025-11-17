@@ -5,7 +5,7 @@ Juego::Juego() {}
 
 void Juego::inicializarJugadores() {
     int n;
-    std::cout << "Ingrese cantidad de jugadores (2-4): ";
+    std::cout << "Ingrese la cantidad de jugadores (2-4): ";
     std::cin >> n;
     std::cin.ignore();
 
@@ -20,28 +20,38 @@ void Juego::inicializarJugadores() {
 
 void Juego::jugarTurno() {
     Jugador& actual = estado.getJugadorActual();
+
     int d1 = dado1.lanzar();
     int d2 = dado2.lanzar();
     int avance = d1 + d2;
 
-    std::cout << "\nTurno de " << actual.nombre << " 🎲 (" << d1 << " + " << d2 << ")\n";
+    std::cout << "\nTurno de " << actual.nombre << " (" << d1 << " + " << d2 << ")\n";
+
     actual.posicion = (actual.posicion + avance) % 40;
 
     reglas.evaluarCasilla(actual, banco, estado);
+
     estado.siguienteTurno();
+    turnos.siguiente();
 }
 
 void Juego::mostrarEstado() {
     std::cout << "\n=== ESTADO DEL JUEGO ===\n";
+
     for (auto& j : estado.getJugadores()) {
         std::cout << j.nombre << " está en posición " << j.posicion
-                  << " | Dinero: $" << banco.getSaldo(j.nombre) << "\n";
+                  << " | Dinero: $" << banco.getSaldo(j.nombre)
+                  << " | Cárcel: " << (j.enCarcel ? "Sí" : "No")
+                  << "\n";
     }
+
+    std::cout << "Turno #" << turnos.getTurno() << "\n";
 }
 
 bool Juego::haTerminado() {
-    int jugadoresActivos = 0;
+    int activos = 0;
     for (auto& j : estado.getJugadores())
-        if (banco.getSaldo(j.nombre) > 0) jugadoresActivos++;
-    return jugadoresActivos <= 1;
+        if (banco.getSaldo(j.nombre) > 0) activos++;
+
+    return activos <= 1;
 }
