@@ -1,33 +1,31 @@
 #include "Comandos.h"
+#include <sstream>
 
-Comandos::Comandos() {
-    // Registrar comandos básicos
-    registrarComando("ayuda", [this]() {
-        mostrarComandos();
-    });
+Comandos::Comandos() {}
 
-    registrarComando("salir", []() {
-        std::cout << "Saliendo del juego..." << std::endl;
-        exit(0);
-    });
+void Comandos::registrar(const std::string& nombre, std::function<void(const std::string&)> accion) {
+    if (nombre.empty() || !accion) return;
+    tabla[nombre] = accion;
 }
 
-void Comandos::registrarComando(const std::string& nombre, std::function<void()> accion) {
-    comandos[nombre] = accion;
+bool Comandos::ejecutar(const std::string& linea) const {
+    std::istringstream iss(linea);
+    std::string cmd;
+    iss >> cmd;
+    if (cmd.empty()) return false;
+
+    auto it = tabla.find(cmd);
+    if (it == tabla.end()) return false;
+
+    std::string resto;
+    std::getline(iss, resto);
+    // trim leading spaces
+    if (!resto.empty() && resto.front() == ' ') resto.erase(0, 1);
+
+    it->second(resto);
+    return true;
 }
 
-void Comandos::ejecutar(const std::string& entrada) {
-    if (comandos.find(entrada) != comandos.end()) {
-        comandos[entrada]();
-    } else {
-        std::cout << "Comando no reconocido. Escribe 'ayuda' para ver los disponibles." << std::endl;
-    }
-}
-
-void Comandos::mostrarComandos() const {
-    std::cout << "=== COMANDOS DISPONIBLES ===" << std::endl;
-    for (const auto& [nombre, _] : comandos) {
-        std::cout << "- " << nombre << std::endl;
-    }
-    std::cout << "============================" << std::endl;
+std::map<std::string, std::function<void(const std::string&)>> Comandos::listar() const {
+    return tabla;
 }
