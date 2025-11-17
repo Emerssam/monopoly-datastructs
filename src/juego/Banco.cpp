@@ -3,27 +3,31 @@
 
 Banco::Banco() {}
 
-void Banco::crearCuenta(const std::string& jugador, int MontoInicial) {
-  cuentas[jugador] = MontoInicial;
+void Banco::crearCuenta(const std::string& jugador, int montoInicial) {
+    cuentas[jugador] = montoInicial;
 }
 
-bool Banco::transFerir(const std::string& origen, const std::string& destino, int monto); {
-  if cuentas[origen] < monto) return false;
-  cuentas[origen] -= monto;
-  cuentas [destino] += monto;
-  return true;
+bool Banco::transferir(const std::string& origen, const std::string& destino, int monto) {
+    if (cuentas[origen] < monto) return false;
+    cuentas[origen] -= monto;
+    cuentas[destino] += monto;
+    return true;
 }
 
-bool Banco::pagarBanco(const std::string& jugador, int monto); {
-  if (cuentas[jugador] < monto) return false;
-  cuantas[jugador] -= monto;
-  return true;
+bool Banco::pagarBanco(const std::string& jugador, int monto) {
+    if (cuentas[jugador] < monto) return false;
+    cuentas[jugador] -= monto;
+    return true;
 }
 
-int Banco::gtSaldo(const std::string& jugador) const; {
-  auto it = cuentas.find(jugador);
-  if (it != cuentas.end())
-    return it->second;
-  return 0;
+bool Banco::recibirDelBanco(const std::string& jugador, int monto) {
+    cuentas[jugador] += monto;
+    return true;
+}
 
+int Banco::getSaldo(const std::string& jugador) const {
+    auto it = cuentas.find(jugador);
+    if (it != cuentas.end())
+        return it->second;
+    return 0;
 }
